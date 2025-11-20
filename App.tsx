@@ -71,6 +71,23 @@ const App: React.FC = () => {
   const [comparisonList, setComparisonList] = useState<HRTool[]>([]);
   const [isComparing, setIsComparing] = useState<boolean>(false);
 
+  // Check for shared tool in URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const shareData = params.get('share');
+    if (shareData) {
+      try {
+        const json = decodeURIComponent(atob(shareData));
+        const tool = JSON.parse(json);
+        if (tool && tool.name && tool.category) {
+          setSelectedTool(tool);
+        }
+      } catch (e) {
+        console.error("Error parsing shared tool data:", e);
+      }
+    }
+  }, []);
+
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -151,10 +168,22 @@ const App: React.FC = () => {
   
   const handleOpenModal = (tool: HRTool) => {
     setSelectedTool(tool);
+    // Clean URL if a share param exists to avoid confusion
+    if (window.location.search.includes('share=')) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('share');
+        window.history.replaceState({}, '', url);
+    }
   };
 
   const handleCloseModal = () => {
     setSelectedTool(null);
+    // Clean URL if a share param exists
+    if (window.location.search.includes('share=')) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('share');
+        window.history.replaceState({}, '', url);
+    }
   };
 
   const renderContent = () => {

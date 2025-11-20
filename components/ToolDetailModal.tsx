@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HRTool } from '../types';
 import { getCategoryStyles } from '../utils/styleUtils';
+import { getFeatureIcon } from '../utils/iconMapper';
 import StarRating from './StarRating';
 
 
@@ -12,7 +13,8 @@ interface ToolDetailModalProps {
 }
 
 const ToolDetailModal: React.FC<ToolDetailModalProps> = ({ tool, onClose, rating, onRate }) => {
-  
+  const [copySuccess, setCopySuccess] = useState(false);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -24,6 +26,22 @@ const ToolDetailModal: React.FC<ToolDetailModalProps> = ({ tool, onClose, rating
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [onClose]);
+
+  const handleShare = () => {
+    try {
+      const json = JSON.stringify(tool);
+      // Use encodeURIComponent to handle UTF-8 characters correctly before encoding to base64
+      const encoded = btoa(encodeURIComponent(json));
+      const shareUrl = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
+      
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      });
+    } catch (error) {
+      console.error('Failed to share tool:', error);
+    }
+  };
 
   if (!tool) return null;
   
@@ -55,9 +73,33 @@ const ToolDetailModal: React.FC<ToolDetailModalProps> = ({ tool, onClose, rating
               <StarRating rating={rating} onRate={onRate} />
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Close modal">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
+          
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleShare}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 border ${copySuccess ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}
+              title="Share unique link to this tool"
+            >
+               {copySuccess ? (
+                 <>
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                   </svg>
+                   <span className="text-sm font-medium">Copied!</span>
+                 </>
+               ) : (
+                 <>
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                   </svg>
+                   <span className="text-sm font-medium">Share</span>
+                 </>
+               )}
+            </button>
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors p-1" aria-label="Close modal">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
         </header>
         
         <div className="p-6 flex-grow">
@@ -65,10 +107,12 @@ const ToolDetailModal: React.FC<ToolDetailModalProps> = ({ tool, onClose, rating
           
           <div className="mb-6">
             <h3 className="font-semibold text-slate-700 mb-3 text-lg">Key Features</h3>
-            <ul className="space-y-2">
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {tool.keyFeatures.map((feature, index) => (
-                <li key={index} className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                <li key={index} className="flex items-start p-2 bg-slate-50 rounded-lg">
+                   <div className="mr-3 mt-0.5">
+                     {getFeatureIcon(feature)}
+                   </div>
                   <span className="text-slate-700">{feature}</span>
                 </li>
               ))}
@@ -92,8 +136,3 @@ const ToolDetailModal: React.FC<ToolDetailModalProps> = ({ tool, onClose, rating
           </button>
         </footer>
       </div>
-    </div>
-  );
-};
-
-export default ToolDetailModal;

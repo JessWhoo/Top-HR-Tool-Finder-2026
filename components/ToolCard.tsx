@@ -1,6 +1,7 @@
 import React from 'react';
 import { HRTool } from '../types';
 import { getCategoryStyles } from '../utils/styleUtils';
+import { getFeatureIcon } from '../utils/iconMapper';
 import StarRating from './StarRating';
 
 interface ToolCardProps {
@@ -60,9 +61,11 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, onClick, rating, onRate, isSe
         <h4 className="font-semibold text-slate-700">Key Features</h4>
         <ul className="mt-2 space-y-2">
           {tool.keyFeatures.map((feature, index) => (
-            <li key={index} className="flex items-start">
-              <svg className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-              <span className="text-slate-600">{feature}</span>
+            <li key={index} className="flex items-start group/feature">
+              <div className="mr-3 transition-transform duration-200 group-hover/feature:scale-110">
+                {getFeatureIcon(feature)}
+              </div>
+              <span className="text-slate-600 text-sm leading-snug pt-0.5">{feature}</span>
             </li>
           ))}
         </ul>

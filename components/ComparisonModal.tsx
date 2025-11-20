@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { HRTool } from '../types';
 import { getCategoryStyles } from '../utils/styleUtils';
+import { getFeatureIcon } from '../utils/iconMapper';
 import StarRating from './StarRating';
 
 interface ComparisonModalProps {
@@ -23,7 +24,8 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ tools, onClose, ratin
     };
   }, [onClose]);
 
-  const gridCols = tools.length === 2 ? 'grid-cols-2' : 'grid-cols-3';
+  // Determine grid columns based on number of tools (max 3 usually)
+  const gridCols = tools.length === 1 ? 'grid-cols-1' : tools.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3';
 
   return (
     <div 
@@ -53,67 +55,78 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ tools, onClose, ratin
           </button>
         </div>
 
-        {/* Comparison Grid */}
-        <div className="overflow-x-auto">
-            <div className="min-w-[800px] p-6">
-                <div className={`grid ${gridCols} gap-8`}>
-                {tools.map((tool) => {
-                    const styles = getCategoryStyles(tool.category);
-                    return (
-                    <div key={tool.name} className="flex flex-col space-y-6">
-                        {/* Tool Header Info */}
-                        <div className={`pb-4 border-b-4 ${styles.border}`}>
-                            <span className={`inline-block ${styles.bg} ${styles.text} text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3`}>
-                                {tool.category}
-                            </span>
-                            <h3 className="text-xl font-bold text-slate-800">{tool.name}</h3>
-                            <div className="mt-2">
-                                <StarRating rating={ratings[tool.name] || 0} onRate={() => {}} />
+        {/* Comparison Content */}
+        <div className="p-6 bg-slate-50/30">
+            <div className={`grid ${gridCols} gap-6`}>
+            {tools.map((tool) => {
+                const styles = getCategoryStyles(tool.category);
+                const rating = ratings[tool.name] || 0;
+
+                return (
+                <div key={tool.name} className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+                    {/* Tool Header */}
+                    <div className={`p-6 border-b-4 ${styles.border}`}>
+                        <span className={`inline-block ${styles.bg} ${styles.text} text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3`}>
+                            {tool.category}
+                        </span>
+                        <h3 className="text-xl font-bold text-slate-800 h-14 flex items-center">{tool.name}</h3>
+                        <div className="mt-2">
+                             {/* Read-only star rating for comparison view */}
+                             <div className="flex items-center space-x-1 pointer-events-none opacity-90">
+                                {[1, 2, 3, 4, 5].map((starIndex) => (
+                                    <svg
+                                        key={starIndex}
+                                        className={`w-5 h-5 ${rating >= starIndex ? 'text-amber-400' : 'text-slate-300'}`}
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                ))}
+                                <span className="text-xs text-slate-400 ml-2">({rating}/5)</span>
                             </div>
                         </div>
-
-                        {/* Description */}
-                        <div>
-                            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Description</h4>
-                            <p className="text-slate-600 text-sm leading-relaxed min-h-[80px]">
-                                {tool.description}
-                            </p>
-                        </div>
-
-                        {/* Key Features */}
-                        <div className="flex-grow bg-slate-50 rounded-lg p-4">
-                            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Key Features</h4>
-                            <ul className="space-y-3">
-                                {tool.keyFeatures.map((feature, idx) => (
-                                <li key={idx} className="flex items-start text-sm">
-                                    <svg className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                                    <span className="text-slate-700">{feature}</span>
-                                </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                         {/* Rationale */}
-                         <div>
-                            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">2026 Prediction</h4>
-                            <p className="text-slate-600 text-sm italic border-l-2 border-slate-300 pl-3">
-                                "{tool.rationale}"
-                            </p>
-                        </div>
                     </div>
-                    );
-                })}
+
+                    {/* Description */}
+                    <div className="p-6 border-b border-slate-100 flex-grow">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Description</h4>
+                        <p className="text-slate-600 text-sm leading-relaxed">{tool.description}</p>
+                    </div>
+
+                    {/* Features */}
+                    <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Key Features</h4>
+                        <ul className="space-y-3">
+                            {tool.keyFeatures.map((feature, idx) => (
+                                <li key={idx} className="flex items-start text-sm text-slate-700">
+                                    <div className="mr-2 mt-0.5 flex-shrink-0">
+                                        {getFeatureIcon(feature)}
+                                    </div>
+                                    <span>{feature}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Rationale */}
+                    <div className="p-6 bg-indigo-50/30">
+                        <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wide mb-2">Why it's top for 2026</h4>
+                        <p className="text-slate-600 text-sm italic">"{tool.rationale}"</p>
+                    </div>
                 </div>
+                );
+            })}
             </div>
         </div>
-
-        <div className="p-4 bg-slate-50 border-t border-slate-200 text-right rounded-b-xl">
-          <button 
-            onClick={onClose}
-            className="px-6 py-2 bg-white border border-slate-300 text-slate-700 font-semibold rounded-lg shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
-          >
-            Close Comparison
-          </button>
+        
+        <div className="p-4 bg-slate-50 rounded-b-xl border-t border-slate-200 text-right">
+             <button 
+                onClick={onClose}
+                className="px-6 py-2 bg-white border border-slate-300 text-slate-700 font-semibold rounded-lg shadow-sm hover:bg-slate-50 transition-colors"
+            >
+                Close Comparison
+            </button>
         </div>
       </div>
     </div>

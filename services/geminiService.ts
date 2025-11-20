@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { HRTool, HRAnalysis } from '../types';
 
@@ -41,7 +42,7 @@ const retryWithBackoff = async <T>(
 
 export async function fetchHRTools(): Promise<HRTool[]> {
   try {
-    const prompt = `Generate a list of 6 innovative, fictional top HR tools for the year 2026. For each tool, provide its name, category (e.g., 'Recruitment & Onboarding', 'Employee Wellness', 'Performance Analytics', 'Learning & Development', 'Compensation & Benefits', 'HR Operations'), a short description, 3 key features as a string array, and a rationale for why it will be a top tool in 2026.`;
+    const prompt = `Generate a list of 6 innovative, fictional top HR tools for the year 2026. For each tool, provide its name, category (e.g., 'Recruitment & Onboarding', 'Employee Wellness', 'Performance Analytics', 'Learning & Development', 'Compensation & Benefits', 'HR Operations'), a short description, 3 key features as a string array, a rationale for why it will be a top tool in 2026, and a fictional website URL.`;
 
     // FIX: Explicitly type the response from the API call to ensure correct type inference.
     const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
@@ -79,8 +80,12 @@ export async function fetchHRTools(): Promise<HRTool[]> {
                     type: Type.STRING,
                     description: "Why this tool is considered a top choice for 2026.",
                   },
+                  website: {
+                    type: Type.STRING,
+                    description: "A fictional website URL for the tool.",
+                  },
                 },
-                required: ["name", "category", "description", "keyFeatures", "rationale"],
+                required: ["name", "category", "description", "keyFeatures", "rationale", "website"],
               },
             },
           },
@@ -105,7 +110,7 @@ export async function fetchHRTools(): Promise<HRTool[]> {
 
 export async function fetchDEITools(): Promise<HRTool[]> {
   try {
-    const prompt = `Generate a list of 3 innovative, fictional top HR tools for the year 2026, specifically focused on Diversity, Equity, and Inclusion (DEI). For each tool, provide its name, set its category to 'Diversity, Equity & Inclusion', provide a short description, 3 key features as a string array, and a rationale for why it will be a top tool in 2026.`;
+    const prompt = `Generate a list of 3 innovative, fictional top HR tools for the year 2026, specifically focused on Diversity, Equity, and Inclusion (DEI). For each tool, provide its name, set its category to 'Diversity, Equity & Inclusion', provide a short description, 3 key features as a string array, a rationale for why it will be a top tool in 2026, and a fictional website URL.`;
 
     const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -126,8 +131,9 @@ export async function fetchDEITools(): Promise<HRTool[]> {
                   description: { type: Type.STRING },
                   keyFeatures: { type: Type.ARRAY, items: { type: Type.STRING } },
                   rationale: { type: Type.STRING },
+                  website: { type: Type.STRING },
                 },
-                required: ["name", "category", "description", "keyFeatures", "rationale"],
+                required: ["name", "category", "description", "keyFeatures", "rationale", "website"],
               },
             },
           },

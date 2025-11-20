@@ -1,9 +1,11 @@
+
 export interface HRTool {
   name: string;
   category: string;
   description: string;
   keyFeatures: string[];
   rationale: string; 
+  website?: string;
 }
 
 export interface EmergingTechnology {

@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { HRTool } from '../types';
 import { getCategoryStyles } from '../utils/styleUtils';
@@ -88,49 +89,3 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ tools, onClose, ratin
                         </div>
                     </div>
 
-                    {/* Description */}
-                    <div className="p-6 border-b border-slate-100 flex-grow">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Description</h4>
-                        <p className="text-slate-600 text-sm leading-relaxed">{tool.description}</p>
-                    </div>
-
-                    {/* Features */}
-                    <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Key Features</h4>
-                        <ul className="space-y-3">
-                            {tool.keyFeatures.map((feature, idx) => (
-                                <li key={idx} className="flex items-start text-sm text-slate-700">
-                                    <div className="mr-2 mt-0.5 flex-shrink-0">
-                                        {getFeatureIcon(feature)}
-                                    </div>
-                                    <span>{feature}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Rationale */}
-                    <div className="p-6 bg-indigo-50/30">
-                        <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wide mb-2">Why it's top for 2026</h4>
-                        <p className="text-slate-600 text-sm italic">"{tool.rationale}"</p>
-                    </div>
-                </div>
-                );
-            })}
-            </div>
-        </div>
-        
-        <div className="p-4 bg-slate-50 rounded-b-xl border-t border-slate-200 text-right">
-             <button 
-                onClick={onClose}
-                className="px-6 py-2 bg-white border border-slate-300 text-slate-700 font-semibold rounded-lg shadow-sm hover:bg-slate-50 transition-colors"
-            >
-                Close Comparison
-            </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default ComparisonModal;

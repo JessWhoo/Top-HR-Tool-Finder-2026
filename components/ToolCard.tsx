@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { HRTool } from '../types';
 import { getCategoryStyles } from '../utils/styleUtils';
@@ -79,18 +80,31 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, onClick, rating, onRate, isSe
         <h4 className="font-semibold text-slate-700">Why it's a Top Tool for 2026</h4>
         <p className="mt-2 text-sm text-slate-600 italic h-16 overflow-hidden text-ellipsis">"{tool.rationale}"</p>
       </div>
-       <div className={`p-4 bg-slate-50/70 border-t border-slate-200 flex justify-between items-center`}>
+       <div className={`p-4 bg-slate-50/70 border-t border-slate-200 flex justify-between items-center gap-2`}>
           <StarRating rating={rating} onRate={onRate} />
-          <button
-            onClick={handleQuickView}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 ${categoryStyles.bg} ${categoryStyles.text} border ${categoryStyles.accent} hover:bg-opacity-80`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            Quick View
-          </button>
+          <div className="flex items-center gap-2">
+             {tool.website && (
+              <a
+                href={tool.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-slate-500 hover:text-indigo-600 text-sm font-medium underline decoration-slate-300 hover:decoration-indigo-500 underline-offset-2 transition-colors"
+              >
+                Learn More
+              </a>
+             )}
+            <button
+              onClick={handleQuickView}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 ${categoryStyles.bg} ${categoryStyles.text} border ${categoryStyles.accent} hover:bg-opacity-80`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              Quick View
+            </button>
+          </div>
        </div>
     </div>
   );

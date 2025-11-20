@@ -42,7 +42,7 @@ const retryWithBackoff = async <T>(
 
 export async function fetchHRTools(): Promise<HRTool[]> {
   try {
-    const prompt = `Generate a list of 6 innovative, fictional top HR tools for the year 2026. For each tool, provide its name, category (e.g., 'Recruitment & Onboarding', 'Employee Wellness', 'Performance Analytics', 'Learning & Development', 'Compensation & Benefits', 'HR Operations'), a short description, 3 key features as a string array, a rationale for why it will be a top tool in 2026, and a fictional website URL.`;
+    const prompt = `Generate a list of 9 innovative, fictional top HR tools for the year 2026. For each tool, provide its name, category (e.g., 'Recruitment & Onboarding', 'Employee Wellness', 'Performance Analytics', 'Learning & Development', 'Compensation & Benefits', 'HR Operations'), a short description, 3 key features as a string array, a rationale for why it will be a top tool in 2026, and a fictional website URL.`;
 
     // FIX: Explicitly type the response from the API call to ensure correct type inference.
     const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({

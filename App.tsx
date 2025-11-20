@@ -290,7 +290,57 @@ const App: React.FC = () => {
       
       {/* Floating Comparison Bar */}
       {comparisonList.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 animate-fade-in-down">
-            <div className="max-w-3xl mx-auto mb-6 p-4 bg-slate-900/90 backdrop-blur-md rounded-full shadow-2xl border border-slate-700 flex items-center justify-between px-6 text-white mx-4 md:mx-auto">
-                <div className="flex items-center space-x-4">
-                    <div className="bg-indigo-500 rounded-full w-8 h-8 flex items-center justify-center
+        <div className="fixed bottom-8 left-0 right-0 z-40 animate-fade-in-down pointer-events-none">
+            <div className="max-w-3xl mx-auto px-4 pointer-events-auto">
+                <div className="p-4 bg-slate-900/90 backdrop-blur-md rounded-full shadow-2xl border border-slate-700 flex items-center justify-between px-6 text-white">
+                    <div className="flex items-center space-x-4">
+                        <div className="bg-indigo-500 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-lg shadow-indigo-500/50">
+                            {comparisonList.length}
+                        </div>
+                        <span className="text-sm font-medium text-slate-200 hidden sm:inline">
+                            {comparisonList.length} {comparisonList.length === 1 ? 'tool' : 'tools'} selected
+                        </span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                         <button 
+                            onClick={clearComparison}
+                            className="text-xs font-medium text-slate-400 hover:text-white transition-colors px-3 py-2"
+                        >
+                            Clear
+                        </button>
+                        <button 
+                            onClick={() => setIsComparing(true)}
+                            className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-2 px-6 rounded-full shadow-lg shadow-indigo-900/50 transition-all transform hover:scale-105 active:scale-95"
+                        >
+                            Compare
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
+
+      {/* Modals */}
+      {selectedTool && (
+        <ToolDetailModal 
+          tool={selectedTool} 
+          onClose={handleCloseModal} 
+          rating={ratings[selectedTool.name] || 0}
+          onRate={(r) => handleRateTool(selectedTool.name, r)}
+        />
+      )}
+
+      {isComparing && (
+        <ComparisonModal 
+            tools={comparisonList} 
+            onClose={() => setIsComparing(false)} 
+            ratings={ratings}
+        />
+      )}
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default App;

@@ -11,9 +11,18 @@ interface ToolDetailModalProps {
   onClose: () => void;
   rating: number;
   onRate: (rating: number) => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 }
 
-const ToolDetailModal: React.FC<ToolDetailModalProps> = ({ tool, onClose, rating, onRate }) => {
+const ToolDetailModal: React.FC<ToolDetailModalProps> = ({ 
+    tool, 
+    onClose, 
+    rating, 
+    onRate,
+    isFavorite,
+    onToggleFavorite
+}) => {
   const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
@@ -76,6 +85,20 @@ const ToolDetailModal: React.FC<ToolDetailModalProps> = ({ tool, onClose, rating
           </div>
           
           <div className="flex items-center gap-3">
+             <button
+                onClick={onToggleFavorite}
+                className={`p-2 rounded-full border transition-all duration-200 shadow-sm ${
+                    isFavorite 
+                    ? 'bg-red-50 border-red-200 text-red-500 hover:bg-red-100' 
+                    : 'bg-white border-slate-200 text-slate-400 hover:text-red-400 hover:bg-slate-50'
+                }`}
+                title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+             >
+                <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${isFavorite ? 'fill-current' : 'fill-none'}`} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+             </button>
+
             <button 
               onClick={handleShare}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 border ${copySuccess ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}

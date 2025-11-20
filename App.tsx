@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { HRTool, HRAnalysis, EmergingTechnology } from './types';
 import { fetchHRTools, fetchHRAnalysis, fetchDEITools } from './services/geminiService';
@@ -9,6 +10,7 @@ import ToolDetailModal from './components/ToolDetailModal';
 import ComparisonModal from './components/ComparisonModal';
 
 const RATINGS_STORAGE_KEY = 'hrToolRatings';
+const FAVORITES_STORAGE_KEY = 'hrToolFavorites';
 
 // --- Analysis Display Component ---
 interface AnalysisDisplayProps {
@@ -66,6 +68,7 @@ const App: React.FC = () => {
   const [sortType, setSortType] = useState<'default' | 'name' | 'category'>('default');
   const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all');
   const [ratings, setRatings] = useState<{ [key: string]: number }>({});
+  const [favorites, setFavorites] = useState<string[]>([]);
   
   // Comparison State
   const [comparisonList, setComparisonList] = useState<HRTool[]>([]);
@@ -98,6 +101,11 @@ const App: React.FC = () => {
         setRatings(JSON.parse(savedRatings));
       }
 
+      const savedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
+      if (savedFavorites) {
+        setFavorites(JSON.parse(savedFavorites));
+      }
+
       const [fetchedTools, fetchedAnalysis, fetchedDEITools] = await Promise.all([
         fetchHRTools(),
         fetchHRAnalysis(),
@@ -123,6 +131,16 @@ const App: React.FC = () => {
     const newRatings = { ...ratings, [toolName]: newRating };
     setRatings(newRatings);
     localStorage.setItem(RATINGS_STORAGE_KEY, JSON.stringify(newRatings));
+  };
+
+  const handleToggleFavorite = (toolName: string) => {
+    setFavorites(prev => {
+      const newFavorites = prev.includes(toolName) 
+        ? prev.filter(f => f !== toolName) 
+        : [...prev, toolName];
+      localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(newFavorites));
+      return newFavorites;
+    });
   };
 
   // Comparison Logic
@@ -165,6 +183,16 @@ const App: React.FC = () => {
     
     return result;
   }, [tools, sortType, selectedCategory]);
+
+  const favoriteToolsList = useMemo(() => {
+    // Combine all tools to search for favorites
+    const allTools = [...tools, ...deiTools];
+    // Filter unique tools that are in favorites
+    return allTools.filter((tool, index, self) => 
+      favorites.includes(tool.name) && 
+      index === self.findIndex((t) => t.name === tool.name)
+    );
+  }, [tools, deiTools, favorites]);
   
   const handleOpenModal = (tool: HRTool) => {
     setSelectedTool(tool);
@@ -215,6 +243,36 @@ const App: React.FC = () => {
       <>
         {analysis && <AnalysisDisplay analysis={analysis} />}
         
+        {favoriteToolsList.length > 0 && (
+          <section className="my-12 animate-fade-in">
+            <h2 className="text-3xl font-bold text-slate-800 text-center mb-4 flex items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+              </svg>
+              Your Favorite Tools
+            </h2>
+             <p className="text-center text-slate-600 max-w-3xl mx-auto mb-8">
+              A curated list of tools you've marked for quick access.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {favoriteToolsList.map((tool) => (
+                <ToolCard 
+                  key={tool.name} 
+                  tool={tool} 
+                  onClick={handleOpenModal}
+                  rating={ratings[tool.name] || 0}
+                  onRate={(rating) => handleRateTool(tool.name, rating)}
+                  isSelected={comparisonList.some(t => t.name === tool.name)}
+                  onToggleCompare={handleToggleCompare}
+                  isFavorite={favorites.includes(tool.name)}
+                  onToggleFavorite={() => handleToggleFavorite(tool.name)}
+                />
+              ))}
+            </div>
+            <div className="border-t border-slate-200 my-12"></div>
+          </section>
+        )}
+
         {deiTools.length > 0 && (
           <section className="my-12">
             <h2 className="text-3xl font-bold text-slate-800 text-center mb-4">
@@ -233,6 +291,8 @@ const App: React.FC = () => {
                   onRate={(rating) => handleRateTool(tool.name, rating)}
                   isSelected={comparisonList.some(t => t.name === tool.name)}
                   onToggleCompare={handleToggleCompare}
+                  isFavorite={favorites.includes(tool.name)}
+                  onToggleFavorite={() => handleToggleFavorite(tool.name)}
                 />
               ))}
             </div>
@@ -295,6 +355,8 @@ const App: React.FC = () => {
                 onRate={(rating) => handleRateTool(tool.name, rating)}
                 isSelected={comparisonList.some(t => t.name === tool.name)}
                 onToggleCompare={handleToggleCompare}
+                isFavorite={favorites.includes(tool.name)}
+                onToggleFavorite={() => handleToggleFavorite(tool.name)}
               />
             ))}
           </div>
@@ -356,6 +418,8 @@ const App: React.FC = () => {
           onClose={handleCloseModal} 
           rating={ratings[selectedTool.name] || 0}
           onRate={(r) => handleRateTool(selectedTool.name, r)}
+          isFavorite={favorites.includes(selectedTool.name)}
+          onToggleFavorite={() => handleToggleFavorite(selectedTool.name)}
         />
       )}
 

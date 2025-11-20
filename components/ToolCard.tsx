@@ -12,15 +12,31 @@ interface ToolCardProps {
   onRate: (rating: number) => void;
   isSelected: boolean;
   onToggleCompare: (tool: HRTool) => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 }
 
-const ToolCard: React.FC<ToolCardProps> = ({ tool, onClick, rating, onRate, isSelected, onToggleCompare }) => {
+const ToolCard: React.FC<ToolCardProps> = ({ 
+    tool, 
+    onClick, 
+    rating, 
+    onRate, 
+    isSelected, 
+    onToggleCompare,
+    isFavorite,
+    onToggleFavorite
+}) => {
   const categoryStyles = getCategoryStyles(tool.category);
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleCompare(tool);
   };
+  
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleFavorite();
+  }
 
   const handleQuickView = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -36,10 +52,26 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, onClick, rating, onRate, isSe
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick(tool)}
       aria-label={`View details for ${tool.name}`}
     >
-      {/* Compare Checkbox */}
-      <div className="absolute top-4 right-4 z-10">
+      {/* Action Buttons */}
+      <div className="absolute top-4 right-4 z-10 flex items-center space-x-2">
+         {/* Favorite Button */}
+         <button
+            onClick={handleFavoriteClick}
+            className={`p-1.5 rounded-full border transition-all duration-200 shadow-sm ${
+                isFavorite 
+                ? 'bg-red-50 border-red-200 text-red-500 hover:bg-red-100' 
+                : 'bg-white/90 border-slate-200 text-slate-400 hover:text-red-400 hover:bg-white'
+            }`}
+            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+         >
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${isFavorite ? 'fill-current' : 'fill-none'}`} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+         </button>
+
+        {/* Compare Toggle */}
         <div 
-          className="flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm border border-slate-200 hover:bg-indigo-50 transition-colors"
+          className="flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-sm border border-slate-200 hover:bg-indigo-50 transition-colors"
           onClick={handleCheckboxClick}
         >
             <label className="flex items-center cursor-pointer space-x-2">

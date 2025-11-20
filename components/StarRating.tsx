@@ -1,14 +1,27 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 
 interface StarRatingProps {
   rating: number;
   onRate: (rating: number) => void;
 }
 
-const Star: React.FC<{ filled: boolean; onClick: () => void; onMouseEnter: () => void; onMouseLeave: () => void; }> = ({ filled, onClick, onMouseEnter, onMouseLeave }) => {
+const Star: React.FC<{ 
+  filled: boolean; 
+  onClick: () => void; 
+  onMouseEnter: () => void; 
+  onMouseLeave: () => void; 
+  isAnimating: boolean;
+  index: number;
+}> = ({ filled, onClick, onMouseEnter, onMouseLeave, isAnimating, index }) => {
   return (
     <svg
-      className={`w-6 h-6 cursor-pointer transition-colors duration-200 ${filled ? 'text-amber-400' : 'text-slate-300 hover:text-amber-300'}`}
+      className={`w-6 h-6 cursor-pointer transition-all duration-300 transform ${
+        filled ? 'text-amber-400' : 'text-slate-300 hover:text-amber-300'
+      } ${isAnimating && filled ? 'scale-125' : 'hover:scale-110'}`}
+      style={{ 
+        transitionDelay: isAnimating ? `${index * 50}ms` : '0ms' 
+      }}
       fill="currentColor"
       viewBox="0 0 20 20"
       onClick={onClick}
@@ -22,33 +35,76 @@ const Star: React.FC<{ filled: boolean; onClick: () => void; onMouseEnter: () =>
 
 const StarRating: React.FC<StarRatingProps> = ({ rating, onRate }) => {
   const [hoverRating, setHoverRating] = useState(0);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    if (showFeedback) {
+      timer = setTimeout(() => {
+        setShowFeedback(false);
+      }, 2000);
+    }
+    return () => clearTimeout(timer);
+  }, [showFeedback]);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    if (isAnimating) {
+      timer = setTimeout(() => {
+        setIsAnimating(false);
+      }, 500); // Duration of the pop animation sequence
+    }
+    return () => clearTimeout(timer);
+  }, [isAnimating]);
 
   const handleClick = (e: React.MouseEvent, ratingValue: number) => {
     e.stopPropagation(); // Prevent card/modal click events
     onRate(ratingValue);
+    setShowFeedback(true);
+    setIsAnimating(true);
   };
   
   const handleMouseEnter = (e: React.MouseEvent, ratingValue: number) => {
     e.stopPropagation();
-    setHoverRating(ratingValue);
+    if (!isAnimating) {
+        setHoverRating(ratingValue);
+    }
   };
   
   const handleMouseLeave = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setHoverRating(0);
+    if (!isAnimating) {
+        setHoverRating(0);
+    }
   };
 
   return (
-    <div className="flex items-center space-x-1">
-      {[1, 2, 3, 4, 5].map((starIndex) => (
-        <Star
-          key={starIndex}
-          filled={(hoverRating || rating) >= starIndex}
-          onClick={(e) => handleClick(e, starIndex)}
-          onMouseEnter={(e) => handleMouseEnter(e, starIndex)}
-          onMouseLeave={(e) => handleMouseLeave(e)}
-        />
-      ))}
+    <div className="relative flex items-center" onClick={(e) => e.stopPropagation()}>
+      {/* Feedback Tooltip */}
+      <div className={`absolute bottom-full left-0 mb-2 z-10 transition-all duration-300 ease-out transform origin-bottom-left ${showFeedback ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-90 translate-y-2 pointer-events-none'}`}>
+        <div className="bg-slate-800 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-xl flex items-center whitespace-nowrap">
+          <svg className="w-3.5 h-3.5 mr-1.5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          Thanks for rating!
+          <div className="absolute -bottom-1 left-3 w-2 h-2 bg-slate-800 transform rotate-45"></div>
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-0.5">
+        {[1, 2, 3, 4, 5].map((starIndex) => (
+          <Star
+            key={starIndex}
+            index={starIndex}
+            filled={(hoverRating || rating) >= starIndex}
+            isAnimating={isAnimating}
+            onClick={(e) => handleClick(e, starIndex)}
+            onMouseEnter={(e) => handleMouseEnter(e, starIndex)}
+            onMouseLeave={(e) => handleMouseLeave(e)}
+          />
+        ))}
+      </div>
     </div>
   );
 };

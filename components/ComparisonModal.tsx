@@ -140,4 +140,33 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ tools, onClose, ratin
                             <a 
                                 href={tool.website} 
                                 target="_blank" 
-                                rel="
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors group"
+                            >
+                                <span>Visit Website</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </a>
+                        </div>
+                    )}
+                </div>
+                );
+            })}
+            </div>
+        </div>
+        
+        <div className="p-4 bg-slate-50 rounded-b-xl border-t border-slate-200 text-right sticky bottom-0 z-30">
+             <button 
+                onClick={onClose}
+                className="px-6 py-2 bg-white border border-slate-300 text-slate-700 font-semibold rounded-lg shadow-sm hover:bg-slate-50 focus:ring-2 focus:ring-slate-200 transition-colors"
+            >
+                Close Comparison
+            </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ComparisonModal;

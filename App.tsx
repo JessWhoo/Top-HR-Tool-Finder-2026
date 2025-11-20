@@ -8,9 +8,11 @@ import LoadingSpinner from './components/LoadingSpinner';
 import ToolCard from './components/ToolCard';
 import ToolDetailModal from './components/ToolDetailModal';
 import ComparisonModal from './components/ComparisonModal';
+import AddToolModal from './components/AddToolModal';
 
 const RATINGS_STORAGE_KEY = 'hrToolRatings';
 const FAVORITES_STORAGE_KEY = 'hrToolFavorites';
+const USER_TOOLS_STORAGE_KEY = 'hrToolUserAdded';
 
 // --- Analysis Display Component ---
 interface AnalysisDisplayProps {
@@ -81,6 +83,7 @@ const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis }) => {
 const App: React.FC = () => {
   const [tools, setTools] = useState<HRTool[]>([]);
   const [deiTools, setDeiTools] = useState<HRTool[]>([]);
+  const [userTools, setUserTools] = useState<HRTool[]>([]);
   const [analysis, setAnalysis] = useState<HRAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +96,9 @@ const App: React.FC = () => {
   // Comparison State
   const [comparisonList, setComparisonList] = useState<HRTool[]>([]);
   const [isComparing, setIsComparing] = useState<boolean>(false);
+  
+  // Add Tool Modal State
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
 
   // Check for shared tool in URL on mount
   useEffect(() => {
@@ -124,6 +130,11 @@ const App: React.FC = () => {
       const savedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
       if (savedFavorites) {
         setFavorites(JSON.parse(savedFavorites));
+      }
+
+      const savedUserTools = localStorage.getItem(USER_TOOLS_STORAGE_KEY);
+      if (savedUserTools) {
+        setUserTools(JSON.parse(savedUserTools));
       }
 
       const [fetchedTools, fetchedAnalysis, fetchedDEITools] = await Promise.all([
@@ -163,6 +174,12 @@ const App: React.FC = () => {
     });
   };
 
+  const handleAddTool = (newTool: HRTool) => {
+    const updatedUserTools = [newTool, ...userTools];
+    setUserTools(updatedUserTools);
+    localStorage.setItem(USER_TOOLS_STORAGE_KEY, JSON.stringify(updatedUserTools));
+  };
+
   // Comparison Logic
   const handleToggleCompare = (tool: HRTool) => {
     setComparisonList(prev => {
@@ -183,13 +200,15 @@ const App: React.FC = () => {
 
 
   const categories = useMemo(() => {
-    const uniqueCategories = [...new Set(tools.map(tool => tool.category))];
+    const allToolsForCats = [...tools, ...deiTools, ...userTools];
+    const uniqueCategories = [...new Set(allToolsForCats.map(tool => tool.category))];
     uniqueCategories.sort();
     return ['all', ...uniqueCategories];
-  }, [tools]);
+  }, [tools, deiTools, userTools]);
   
   const filteredAndSortedTools = useMemo(() => {
-    let result = [...tools];
+    // Combine generated tools and user added tools for the main list
+    let result = [...userTools, ...tools];
 
     if (selectedCategory !== 'all') {
       result = result.filter(tool => tool.category === selectedCategory);
@@ -202,17 +221,17 @@ const App: React.FC = () => {
     }
     
     return result;
-  }, [tools, sortType, selectedCategory]);
+  }, [tools, userTools, sortType, selectedCategory]);
 
   const favoriteToolsList = useMemo(() => {
     // Combine all tools to search for favorites
-    const allTools = [...tools, ...deiTools];
+    const allTools = [...userTools, ...tools, ...deiTools];
     // Filter unique tools that are in favorites
     return allTools.filter((tool, index, self) => 
       favorites.includes(tool.name) && 
       index === self.findIndex((t) => t.name === tool.name)
     );
-  }, [tools, deiTools, favorites]);
+  }, [tools, deiTools, userTools, favorites]);
   
   const handleOpenModal = (tool: HRTool) => {
     setSelectedTool(tool);
@@ -340,11 +359,11 @@ const App: React.FC = () => {
             </h2>
 
             {/* Control Panel */}
-            <div className="glass-panel rounded-2xl p-2 mb-10 sticky top-4 z-30 transition-all duration-300">
-              <div className="flex flex-col lg:flex-row gap-4 items-center justify-between p-2">
+            <div className="glass-panel rounded-2xl p-2 mb-10 sticky top-4 z-30 transition-all duration-300 shadow-lg">
+              <div className="flex flex-col xl:flex-row gap-4 items-center justify-between p-2">
                 
                 {/* Categories */}
-                <div className="flex flex-wrap justify-center lg:justify-start gap-1.5 w-full lg:w-auto">
+                <div className="flex flex-wrap justify-center xl:justify-start gap-1.5 w-full xl:w-auto">
                     {categories.map(category => (
                       <button
                         key={category}
@@ -361,28 +380,42 @@ const App: React.FC = () => {
                 </div>
 
                 {/* Separator */}
-                <div className="hidden lg:block h-8 w-px bg-slate-200"></div>
+                <div className="hidden xl:block h-8 w-px bg-slate-200"></div>
 
-                {/* Sort */}
-                <div className="flex items-center bg-slate-100/50 p-1 rounded-xl w-full lg:w-auto">
-                   <span className="text-xs font-semibold text-slate-400 uppercase px-3 hidden sm:block">Sort:</span>
-                   <div className="flex w-full">
-                    <button 
-                      onClick={() => setSortType('default')} 
-                      className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${sortType === 'default' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}>
-                      Relevance
+                {/* Actions */}
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 w-full xl:w-auto justify-center">
+                    {/* Add Tool Button */}
+                    <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-md hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Tool
                     </button>
-                    <button 
-                      onClick={() => setSortType('name')} 
-                      className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${sortType === 'name' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}>
-                      Name
-                    </button>
-                    <button 
-                      onClick={() => setSortType('category')} 
-                      className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${sortType === 'category' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}>
-                      Category
-                    </button>
-                   </div>
+
+                    {/* Sort */}
+                    <div className="flex items-center bg-slate-100/50 p-1 rounded-xl w-full sm:w-auto">
+                        <span className="text-xs font-semibold text-slate-400 uppercase px-3 hidden sm:block">Sort:</span>
+                        <div className="flex w-full">
+                            <button 
+                            onClick={() => setSortType('default')} 
+                            className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${sortType === 'default' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}>
+                            Relevance
+                            </button>
+                            <button 
+                            onClick={() => setSortType('name')} 
+                            className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${sortType === 'name' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}>
+                            Name
+                            </button>
+                            <button 
+                            onClick={() => setSortType('category')} 
+                            className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${sortType === 'category' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}>
+                            Category
+                            </button>
+                        </div>
+                    </div>
                 </div>
               </div>
             </div>
@@ -411,14 +444,23 @@ const App: React.FC = () => {
             </div>
             <h3 className="text-xl font-semibold text-slate-800">No tools found</h3>
             <p className="mt-2 text-slate-500">
-              Try adjusting your filters to find what you're looking for.
+              Try adjusting your filters or add a new tool manually.
             </p>
-            <button 
-                onClick={() => {setSelectedCategory('all'); setSortType('default');}}
-                className="mt-6 text-indigo-600 font-medium hover:text-indigo-800 hover:underline"
-            >
-                Clear all filters
-            </button>
+            <div className="flex gap-4 justify-center mt-6">
+                <button 
+                    onClick={() => {setSelectedCategory('all'); setSortType('default');}}
+                    className="text-indigo-600 font-medium hover:text-indigo-800 hover:underline"
+                >
+                    Clear all filters
+                </button>
+                 <span className="text-slate-300">|</span>
+                 <button 
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="text-indigo-600 font-medium hover:text-indigo-800 hover:underline"
+                >
+                    Add New Tool
+                </button>
+            </div>
           </div>
         )}
       </>
@@ -480,6 +522,14 @@ const App: React.FC = () => {
             tools={comparisonList} 
             onClose={() => setIsComparing(false)} 
             ratings={ratings}
+        />
+      )}
+
+      {isAddModalOpen && (
+        <AddToolModal
+            onClose={() => setIsAddModalOpen(false)}
+            onAdd={handleAddTool}
+            existingCategories={categories}
         />
       )}
       

@@ -67,6 +67,8 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ tools, onClose, ratin
                 const styles = getCategoryStyles(tool.category);
                 const rating = ratings[tool.name] || 0;
                 const animationDelay = `${index * 100}ms`;
+                // Ensure URL has protocol
+                const websiteUrl = tool.website?.startsWith('http') ? tool.website : `https://${tool.website}`;
 
                 return (
                 <div 
@@ -138,7 +140,7 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ tools, onClose, ratin
                     {tool.website && (
                         <div className="p-4 bg-white text-center border-t border-slate-200">
                             <a 
-                                href={tool.website} 
+                                href={websiteUrl} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors group"

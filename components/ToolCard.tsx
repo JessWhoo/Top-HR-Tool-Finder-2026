@@ -43,6 +43,9 @@ const ToolCard: React.FC<ToolCardProps> = ({
     onClick(tool);
   };
 
+  // Ensure URL has protocol
+  const websiteUrl = tool.website?.startsWith('http') ? tool.website : `https://${tool.website}`;
+
   return (
     <div 
       className={`group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out flex flex-col overflow-hidden border-2 cursor-pointer ${isSelected ? 'border-indigo-500 ring-2 ring-indigo-200' : `${categoryStyles.border} border-transparent border-t-4 hover:-translate-y-1.5`}`}
@@ -117,7 +120,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
           <div className="flex items-center gap-2">
              {tool.website && (
               <a
-                href={tool.website}
+                href={websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}

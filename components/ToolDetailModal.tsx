@@ -59,7 +59,9 @@ const ToolDetailModal: React.FC<ToolDetailModalProps> = ({
   // Dynamically create class names for button colors
   const buttonBgClass = categoryStyles.bg.replace('bg-', 'bg-').replace('100', '600');
   const buttonHoverBgClass = categoryStyles.bg.replace('bg-', 'hover:bg-').replace('100', '700');
-
+  
+  // Ensure URL has protocol
+  const websiteUrl = tool.website?.startsWith('http') ? tool.website : `https://${tool.website}`;
 
   return (
     <div 
@@ -153,7 +155,7 @@ const ToolDetailModal: React.FC<ToolDetailModalProps> = ({
           {tool.website && (
               <div className="flex justify-start">
                   <a 
-                    href={tool.website} 
+                    href={websiteUrl} 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="flex items-center text-indigo-600 hover:text-indigo-800 font-medium transition-colors"

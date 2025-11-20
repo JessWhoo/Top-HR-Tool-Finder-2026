@@ -136,3 +136,8 @@ const ToolDetailModal: React.FC<ToolDetailModalProps> = ({ tool, onClose, rating
           </button>
         </footer>
       </div>
+    </div>
+  );
+};
+
+export default ToolDetailModal;

@@ -148,16 +148,17 @@ const ToolDetailModal: React.FC<ToolDetailModalProps> = ({
             <p className="text-indigo-900/80 italic text-lg font-serif">"{tool.rationale}"</p>
           </div>
 
+          {/* Website Link Section - Prominent and Conditional */}
           {tool.website && (
-              <div className="flex justify-center md:justify-start pt-4">
+              <div className="flex justify-center md:justify-start pt-4 border-t border-slate-100 mt-6">
                   <a 
                     href={websiteUrl} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="group flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:scale-[1.02] transition-all duration-200"
+                    className="group flex items-center justify-center w-full md:w-auto gap-2 px-8 py-4 bg-indigo-600 text-white font-bold text-lg rounded-xl shadow-xl shadow-indigo-200 hover:bg-indigo-700 hover:scale-[1.02] transition-all duration-200"
                   >
                       <span>Visit Official Website</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
                   </a>
